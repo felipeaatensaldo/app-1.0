@@ -1,0 +1,165 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Calculadora LED Final</title>
+<style>
+body{
+  background:#020617;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  font-family:Arial,sans-serif;
+}
+.calculator{
+  background:#020617;
+  padding:20px;
+  border-radius:18px;
+  width:320px;
+  box-shadow:0 0 25px #ef4444;
+}
+.display{
+  background:black;
+  color:#38bdf8;
+  font-size:26px;
+  padding:12px;
+  border-radius:10px;
+  text-align:right;
+  margin-bottom:8px;
+}
+.history{
+  color:#94a3b8;
+  font-size:12px;
+  height:55px;
+  overflow-y:auto;
+  margin-bottom:10px;
+}
+.buttons{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+button{
+  padding:14px;
+  font-size:18px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  background:#020617;
+  color:white;
+  box-shadow:0 0 6px #ef4444,0 0 12px #ef4444,inset 0 0 6px #ef4444;
+}
+.equal{
+  background:#15803d;
+  box-shadow:0 0 8px #22c55e,inset 0 0 8px #22c55e;
+}
+.clear{background:#7f1d1d}
+.back{background:#1e293b}
+.emoji{
+  position:fixed;
+  font-size:22px;
+  pointer-events:none;
+  animation:pop .7s ease-out forwards;
+}
+@keyframes pop{
+  from{transform:scale(0);opacity:1}
+  to{transform:scale(2.5);opacity:0}
+}
+</style>
+</head>
+<body>
+
+<div class="calculator">
+  <div class="display" id="display">0</div>
+  <div class="history" id="history"></div>
+
+  <div class="buttons">
+    <button onclick="press('9',event,true)">9</button>
+    <button onclick="press('8',event,true)">8</button>
+    <button onclick="press('7',event,true)">7</button>
+
+    <button onclick="press('6',event,true)">6</button>
+    <button onclick="press('5',event,true)">5</button>
+    <button onclick="press('4',event,true)">4</button>
+
+    <button onclick="press('3',event,true)">3</button>
+    <button onclick="press('2',event,true)">2</button>
+    <button onclick="press('1',event,true)">1</button>
+
+    <button onclick="press('0',event,true)">0</button>
+    <button onclick="press('.',event,false)">.</button>
+    <button onclick="press('%',event,false)">%</button>
+
+    <button onclick="press('+',event,false)">+</button>
+    <button onclick="press('-',event,false)">−</button>
+    <button onclick="press('*',event,false)">×</button>
+
+    <button onclick="press('/',event,false)">÷</button>
+    <button onclick="press('(',event,false)">(</button>
+    <button onclick="press(')',event,false)">)</button>
+
+    <button onclick="pressRoot(event)">√</button>
+    <button class="equal" onclick="calculate(event)">=</button>
+    <button class="clear" onclick="clearAll(event)">CA</button>
+
+    <button class="back" onclick="backspace(event)">C</button>
+  </div>
+</div>
+
+<script>
+let display=document.getElementById("display");
+let history=document.getElementById("history");
+let current="";
+
+function press(value,e,isNumber){
+  spawnEmoji(e,isNumber ? "⚡" : "🔧");
+  current+=value;
+  display.textContent=current;
+}
+
+function pressRoot(e){
+  spawnEmoji(e,"🔧");
+  current+="√(";
+  display.textContent=current;
+}
+
+function backspace(e){
+  spawnEmoji(e,"✂️");
+  current=current.slice(0,-1);
+  display.textContent=current||"0";
+}
+
+function clearAll(e){
+  spawnEmoji(e,"💥");
+  current="";
+  display.textContent="0";
+}
+
+function calculate(e){
+  spawnEmoji(e,"⭐");
+  try{
+    let expr=current.replace(/√\(/g,"Math.sqrt(").replace(/(\d+(?:\.\d+)?)%/g,"($1/100)");
+    let result=eval(expr);
+    history.innerHTML+=`<div>${current} = ${result}</div>`;
+    current=result.toString();
+    display.textContent=current;
+  }catch{
+    display.textContent="Error";
+  }
+}
+
+function spawnEmoji(e,emoji){
+  let el=document.createElement("div");
+  el.className="emoji";
+  el.textContent=emoji;
+  el.style.left=e.clientX+"px";
+  el.style.top=e.clientY+"px";
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),700);
+}
+</script>
+
+</body>
+</html>
